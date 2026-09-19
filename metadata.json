@@ -1,0 +1,6 @@
+{
+  "name": "Mapa da Prosperidade | Método MIL",
+  "description": "Diagnóstico do momento financeiro avaliando Renda, Estrutura, Segurança, Patrimônio, Expansão e Liderança pelo Método MIL da Inspirar Finanças.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

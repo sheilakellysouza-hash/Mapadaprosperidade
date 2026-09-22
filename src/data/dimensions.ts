@@ -192,3 +192,187 @@ export const BUSINESS_QUESTIONS: string[] = [
   'Hoje, o negócio consegue simultaneamente remunerar você, manter sua operação e formar recursos para crescer?',
   'O seu negócio está ajudando você a construir patrimônio pessoal ou apenas financiando seu custo de vida?'
 ];
+
+export interface DimensionMeta {
+  id: string;
+  orderNumber: number;
+  title: string;
+  shortTitle: string;
+  badgeBg: string;
+  badgeBorder: string;
+  badgeIconColor: string;
+  suggestedFocus: string;
+  stageDescriptions: {
+    Sustentar: string;
+    Organizar: string;
+    Construir: string;
+    Expandir: string;
+  };
+  actionAdvice: {
+    Sustentar: string;
+    Organizar: string;
+    Construir: string;
+    Expandir: string;
+  };
+}
+
+export const DIMENSION_METADATA: Record<string, DimensionMeta> = {
+  renda: {
+    id: 'renda',
+    orderNumber: 1,
+    title: '1. Renda',
+    shortTitle: 'Renda',
+    badgeBg: 'bg-[#0E1B33]',
+    badgeBorder: 'border-[#1E2E56]',
+    badgeIconColor: 'text-[#C59B68]',
+    suggestedFocus: 'Fortalecer a base da sua renda',
+    stageDescriptions: {
+      Sustentar: 'A renda ainda está predominantemente dedicada ao presente.',
+      Organizar: 'A renda sustenta o custo de vida, mas ainda com pouca margem livre para acúmulo contínuo.',
+      Construir: 'A renda gera excedentes regulares que alimentam investimentos e objetivos de médio e longo prazo.',
+      Expandir: 'Capacidade consolidada de gerar múltiplos fluxos de renda e alavancar ganhos estrategicamente.'
+    },
+    actionAdvice: {
+      Sustentar: 'Mapear imediatamente a relação entre horas trabalhadas e valor da hora gerada, identificando vazamentos de energia e custos.',
+      Organizar: 'Identificar habilidades secundárias ou novos serviços de maior margem para gerar uma rota de aumento de até 30%.',
+      Construir: 'Automatizar o percentual de investimento no exato momento da entrada da renda (Pague-se Primeiro).',
+      Expandir: 'Desenvolver produtos de escala, parcerias societárias ou ativos que desvinculem a renda direta do seu tempo operacional.'
+    }
+  },
+  estrutura: {
+    id: 'estrutura',
+    orderNumber: 2,
+    title: '2. Estrutura',
+    shortTitle: 'Estrutura',
+    badgeBg: 'bg-[#0F766E]',
+    badgeBorder: 'border-[#115E59]',
+    badgeIconColor: 'text-emerald-300',
+    suggestedFocus: 'Organizar sua estrutura financeira',
+    stageDescriptions: {
+      Sustentar: 'Compromissos fixos e custo de vida consomem praticamente tudo o que entra.',
+      Organizar: 'Você conhece os números gerais, mas ainda falta um orçamento preditivo por percentuais.',
+      Construir: 'Estrutura equilibrada com percentuais definidos para viver o presente, proteger e construir.',
+      Expandir: 'Governança financeira de alto padrão, com previsibilidade de fluxo de caixa e otimização total.'
+    },
+    actionAdvice: {
+      Sustentar: 'Definir o Custo Real de Vida e renegociar despesas recorrentes que não geram retorno ou bem-estar.',
+      Organizar: 'Adotar a regra dos percentuais estratégicos do Método MIL (Presente, Objetivos, Patrimônio).',
+      Construir: 'Realizar fechamentos mensais de indicadores de eficiência financeira para readequar despesas supérfluas.',
+      Expandir: 'Planejar eficiência tributária, sucessória e alocação patrimonial em estruturas familiares ou empresariais.'
+    }
+  },
+  seguranca: {
+    id: 'seguranca',
+    orderNumber: 3,
+    title: '3. Segurança',
+    shortTitle: 'Segurança',
+    badgeBg: 'bg-[#065F46]',
+    badgeBorder: 'border-[#047857]',
+    badgeIconColor: 'text-emerald-300',
+    suggestedFocus: 'Construir sua segurança e reservas',
+    stageDescriptions: {
+      Sustentar: 'Reserva de liquidez inexistente ou inferior a 1 mês de custo de vida.',
+      Organizar: 'Reserva em formação cobrindo de 1 a 3 meses de despesas básicas, ainda sensível a imprevistos.',
+      Construir: 'Colchão de liquidez sólido cobrindo de 3 a 6 meses de tranquilidade em ativos seguros.',
+      Expandir: 'Segurança plena cobrindo de 6 a 12+ meses combinada com blindagem securitária e jurídica.'
+    },
+    actionAdvice: {
+      Sustentar: 'Separar uma conta específica fora do banco do dia a dia e iniciar a meta da Reserva de Paz (1 mês de custos essenciais).',
+      Organizar: 'Definir um aporte mensal inviolável até atingir 3 meses de tranquilidade financeira.',
+      Construir: 'Calibrar a rentabilidade da reserva em ativos pós-fixados líquidos e avaliar seguros de renda e vida adequados.',
+      Expandir: 'Estruturar estratégias de diversificação internacional e proteção de ativos contra volatilidades sistêmicas.'
+    }
+  },
+  patrimonio: {
+    id: 'patrimonio',
+    orderNumber: 4,
+    title: '4. Patrimônio',
+    shortTitle: 'Patrimônio',
+    badgeBg: 'bg-[#1E3A8A]',
+    badgeBorder: 'border-[#1D4ED8]',
+    badgeIconColor: 'text-sky-300',
+    suggestedFocus: 'Planejar a formação de patrimônio',
+    stageDescriptions: {
+      Sustentar: 'Patrimônio líquido embrionário, sem acompanhamento periódico de ativos e passivos.',
+      Organizar: 'Primeiras medições de patrimônio líquido realizadas, com eliminação gradual de dívidas onerosas.',
+      Construir: 'Patrimônio em crescimento acelerado por meio de ativos geradores de renda e metas claras.',
+      Expandir: 'Patrimônio maduro e diversificado, gerando renda passiva perpétua e estabilidade geracional.'
+    },
+    actionAdvice: {
+      Sustentar: 'Calcular seu Balanço Patrimonial Pessoal: listar todos os bens reais menos financiamentos e dívidas.',
+      Organizar: 'Estipular uma meta anual de valorização do Patrimônio Líquido com revisão semestral.',
+      Construir: 'Acelerar a migração de recursos da renda ativa para ativos geradores de proventos e valorização.',
+      Expandir: 'Implementar governança patrimonial avançada, holdings e diversificação multi-mercado.'
+    }
+  },
+  expansao: {
+    id: 'expansao',
+    orderNumber: 5,
+    title: '5. Expansão',
+    shortTitle: 'Expansão',
+    badgeBg: 'bg-[#581C87]',
+    badgeBorder: 'border-[#6B21A8]',
+    badgeIconColor: 'text-purple-300',
+    suggestedFocus: 'Desenvolver novos canais e expansão',
+    stageDescriptions: {
+      Sustentar: 'Foco quase total na sustentação do momento, sem margem mental para projetos de expansão.',
+      Organizar: 'Ideias e oportunidades identificadas, mas que ainda não foram convertidas em rotas de ação.',
+      Construir: 'Execução de novos projetos, produtos ou serviços que ampliam o alcance profissional.',
+      Expandir: 'Escala consolidada, multiplicação de impacto e consolidação de legado profissional/empresarial.'
+    },
+    actionAdvice: {
+      Sustentar: 'Identificar tarefas operacionais que consomem seu tempo e não geram retorno direto de renda.',
+      Organizar: 'Validar 1 rota de expansão profissional nos próximos 90 dias com baixo custo de teste.',
+      Construir: 'Estabelecer parcerias estratégicas e canais de atração de clientes de maior poder aquisitivo.',
+      Expandir: 'Criar modelos de negócio baseados em equity, franqueamento, licenciamento ou liderança setorial.'
+    }
+  },
+  lideranca: {
+    id: 'lideranca',
+    orderNumber: 6,
+    title: '6. Liderança',
+    shortTitle: 'Liderança',
+    badgeBg: 'bg-[#854D0E]',
+    badgeBorder: 'border-[#A16207]',
+    badgeIconColor: 'text-amber-300',
+    suggestedFocus: 'Traduzir intenções em governança e metas',
+    stageDescriptions: {
+      Sustentar: 'Dificuldade em transformar desejos financeiros em planos objetivos e prazos realizáveis.',
+      Organizar: 'Metas gerais estabelecidas, mas com oscilações no acompanhamento e no cumprimento.',
+      Construir: 'Metas com número, prazo e rotina de prestação de contas pessoal sendo cumpridas.',
+      Expandir: 'Liderança executiva da própria trajetória financeira, com tomada de decisão serena e visão de legado.'
+    },
+    actionAdvice: {
+      Sustentar: 'Escrever 1 meta financeira prioritária com valor e data-limite exata para os próximos 6 meses.',
+      Organizar: 'Reservar 30 minutos a cada 15 dias para uma Sessão de Governança Pessoal/Familiar de revisão.',
+      Construir: 'Contar com mentoria ou assessoria especializada para validar decisões estratégicas de alocação.',
+      Expandir: 'Instituir conselho familiar ou diretrizes de perpetuidade de valores e propósito patrimonial.'
+    }
+  }
+};
+
+export function getDimensionMeta(dimId: string): DimensionMeta {
+  return DIMENSION_METADATA[dimId] || {
+    id: dimId,
+    orderNumber: 1,
+    title: dimId,
+    shortTitle: dimId,
+    badgeBg: 'bg-[#0E1B33]',
+    badgeBorder: 'border-[#1E2E56]',
+    badgeIconColor: 'text-[#C59B68]',
+    suggestedFocus: `Evoluir dimensão ${dimId}`,
+    stageDescriptions: {
+      Sustentar: 'A renda ainda está predominantemente dedicada ao presente.',
+      Organizar: 'Estágio de organização e estruturação de bases.',
+      Construir: 'Construção ativa de resultados consistentes.',
+      Expandir: 'Maturidade de expansão e legado.'
+    },
+    actionAdvice: {
+      Sustentar: 'Estruturar o presente para garantir o essencial.',
+      Organizar: 'Ganhar consistência nas decisões financeiras.',
+      Construir: 'Investir e ampliar resultados.',
+      Expandir: 'Multiplicar capital e gerar impacto.'
+    }
+  };
+}
+

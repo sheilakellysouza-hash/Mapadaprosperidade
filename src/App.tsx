@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Lock } from 'lucide-react';
 import { Header } from './components/Header';
 import { WelcomeStep } from './components/WelcomeStep';
 import { LeadStep } from './components/LeadStep';
@@ -6,7 +7,7 @@ import { QuizStep } from './components/QuizStep';
 import { BusinessStep } from './components/BusinessStep';
 import { ResultReport } from './components/ResultReport';
 import { AdminDashboard } from './components/AdminDashboard';
-import { DIMENSIONS } from './data/dimensions';
+import { DIMENSIONS, getDimensionMeta } from './data/dimensions';
 import type { LeadData, DimensionResult, Recommendation, AppStep, StageName, BusinessChoice } from './types';
 
 export default function App() {
@@ -144,21 +145,20 @@ export default function App() {
       
       let stageNum = 1;
       let stageName: StageName = 'Sustentar';
-      let description = 'A renda ainda está predominantemente dedicada ao presente.';
       
       if (avg >= 3.5) {
         stageNum = 4;
         stageName = 'Expandir';
-        description = 'Existe base sólida para ampliar renda, patrimônio e novas possibilidades.';
       } else if (avg >= 2.5) {
         stageNum = 3;
         stageName = 'Construir';
-        description = 'A renda já começa a produzir segurança, reservas e acúmulo patrimonial.';
       } else if (avg >= 1.8) {
         stageNum = 2;
         stageName = 'Organizar';
-        description = 'Existe capacidade de geração, mas falta estruturação para direcioná-la estrategicamente.';
       }
+
+      const meta = getDimensionMeta(dim.id);
+      const description = meta.stageDescriptions[stageName] || 'A renda ainda está predominantemente dedicada ao presente.';
       
       results[dim.id] = {
         title: dim.title,
@@ -307,6 +307,7 @@ export default function App() {
             {step === 'result' && (
               <ResultReport 
                 lead={lead}
+                answers={answers}
                 dimensionResults={dimensionResults}
                 businessChoice={businessChoice}
                 businessAns={businessAns}
@@ -321,9 +322,20 @@ export default function App() {
           <p className="font-medium">
             © {new Date().getFullYear()} Inspirar Finanças — Método MIL. Todos os direitos reservados.
           </p>
-          <p className="text-[11px] text-slate-400 mt-1.5">
-            Plataforma de Diagnóstico Estratégico de Prosperidade Financeira
-          </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mt-2 text-[11px] text-slate-400">
+            <span>Plataforma de Diagnóstico Estratégico de Prosperidade Financeira</span>
+            <span className="hidden sm:inline opacity-40">•</span>
+            <button
+              id="btn-footer-gestora"
+              type="button"
+              onClick={() => setIsAdminView(true)}
+              className="inline-flex items-center gap-1 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer group py-0.5"
+              title="Acesso exclusivo da Gestora"
+            >
+              <Lock className="w-3 h-3 text-slate-300 group-hover:text-[#C59B68] transition-colors" />
+              <span className="group-hover:underline">Acesso Gestora</span>
+            </button>
+          </div>
         </footer>
       </div>
     </div>

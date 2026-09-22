@@ -23,8 +23,12 @@ import {
   KeyRound,
   Link2,
   Copy,
-  Check
+  Check,
+  FileText,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
+import { DIMENSIONS } from '../data/dimensions';
 import type { SubmissionRecord } from '../types';
 
 interface AdminDashboardProps {
@@ -43,6 +47,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToApp }) =
   const [filterStage, setFilterStage] = useState<string>('all');
 
   const [selectedSubmission, setSelectedSubmission] = useState<SubmissionRecord | null>(null);
+  const [showDetailedAnswers, setShowDetailedAnswers] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [whatsappConfig, setWhatsappConfig] = useState('5571999999999');
   const [newAdminPassword, setNewAdminPassword] = useState('');
@@ -349,7 +354,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToApp }) =
               autoFocus
             />
             <p className="text-[11px] text-slate-400 mt-1.5">
-              Senha padrão inicial: <code className="font-semibold text-slate-600">inspirar123</code> ou <code className="font-semibold text-slate-600">1234</code>
+              Acesso restrito à equipe Inspirar Finanças. Digite sua senha de gestora.
             </p>
           </div>
 
@@ -805,6 +810,51 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToApp }) =
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Detailed Questionnaire Answers */}
+              {selectedSubmission.answers && Object.keys(selectedSubmission.answers).length > 0 && (
+                <div className="rounded-xl border border-slate-200 overflow-hidden bg-white">
+                  <button
+                    type="button"
+                    onClick={() => setShowDetailedAnswers(!showDetailedAnswers)}
+                    className="w-full flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left cursor-pointer"
+                  >
+                    <span className="text-xs font-bold text-[#0E1B33] flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-[#C59B68]" />
+                      Respostas das 12 Perguntas do Método MIL
+                    </span>
+                    <span className="text-xs text-[#8C6934] font-semibold flex items-center gap-1">
+                      {showDetailedAnswers ? 'Recolher' : 'Ver todas as respostas'}
+                      {showDetailedAnswers ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </span>
+                  </button>
+
+                  {showDetailedAnswers && (
+                    <div className="p-4 space-y-4 max-h-72 overflow-y-auto border-t border-slate-200">
+                      {DIMENSIONS.map((dim) => (
+                        <div key={dim.id} className="space-y-2">
+                          <h5 className="text-[11px] font-black uppercase tracking-wider text-[#8C6934] border-b border-slate-100 pb-1">
+                            {dim.title}
+                          </h5>
+                          {dim.questions.map((q) => {
+                            const ansIdx = selectedSubmission.answers?.[q.id];
+                            const chosenOpt = ansIdx !== undefined ? q.options[ansIdx] : null;
+                            return (
+                              <div key={q.id} className="bg-[#FAF8F5] p-2.5 rounded-lg border border-[#EFE5D5] text-xs">
+                                <p className="font-semibold text-slate-800 text-[11px] mb-1">{q.title}</p>
+                                <p className="text-[#8C6934] font-medium flex items-center gap-1.5 text-[11px]">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-[#C59B68]" />
+                                  {chosenOpt ? `${chosenOpt.label} (${chosenOpt.score} pts)` : 'Não respondida'}
+                                </p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 

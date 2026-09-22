@@ -32,7 +32,7 @@ function getSettings() {
   }
   return {
     whatsappNumber: '5571999999999',
-    adminPassword: 'inspirarfinancas'
+    adminPassword: 'P@ta2105'
   };
 }
 
@@ -169,7 +169,7 @@ app.post('/api/admin/verify', (req, res) => {
 
   const { password } = req.body;
   const settings = getSettings();
-  const valid = password === settings.adminPassword || password === 'inspirar123';
+  const valid = password === settings.adminPassword || password === 'P@ta2105';
 
   if (valid) {
     loginAttempts.delete(ip);

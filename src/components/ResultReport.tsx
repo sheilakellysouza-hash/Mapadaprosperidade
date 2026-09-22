@@ -13,6 +13,7 @@ import {
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import confetti from 'canvas-confetti';
+import { RodaDaProsperidade } from './RodaDaProsperidade';
 import type { LeadData, DimensionResult, Recommendation, BusinessChoice } from '../types';
 
 function cn(...inputs: (string | undefined | null | false)[]) {
@@ -21,6 +22,7 @@ function cn(...inputs: (string | undefined | null | false)[]) {
 
 interface ResultReportProps {
   lead: LeadData;
+  answers: Record<string, number>;
   dimensionResults: Record<string, DimensionResult>;
   businessChoice: BusinessChoice;
   businessAns: Record<number, string>;
@@ -30,6 +32,7 @@ interface ResultReportProps {
 
 export const ResultReport: React.FC<ResultReportProps> = ({
   lead,
+  answers,
   dimensionResults,
   businessChoice,
   businessAns,
@@ -39,6 +42,12 @@ export const ResultReport: React.FC<ResultReportProps> = ({
   const [copied, setCopied] = useState(false);
   const [whatsappTargetNumber, setWhatsappTargetNumber] = useState('5571999999999');
   const hasBusiness = businessChoice === 'yes';
+
+  const overallAvg = React.useMemo(() => {
+    const list = Object.values(dimensionResults);
+    if (!list.length) return 1.0;
+    return list.reduce((a, b) => a + b.avg, 0) / list.length;
+  }, [dimensionResults]);
 
   useEffect(() => {
     fetch('/api/settings')
@@ -69,8 +78,12 @@ export const ResultReport: React.FC<ResultReportProps> = ({
   const businessTotalAnswered = Object.keys(businessAns).length;
 
   const profileType = hasBusiness ? 'Empresário/PJ' : 'Pessoa Física';
-  const whatsappMessage = `Olá! Meu nome é ${lead.name}. Fiz o Mapa da Prosperidade (Método MIL da Inspirar Finanças) como ${profileType} e meu resultado indicou: ${recommendation.product}. Gostaria de conversar sobre meu diagnóstico.`;
+  const whatsappMessage = `Olá! Meu nome é ${lead.name}. Fiz o Mapa da Prosperidade (Método MIL da Inspirar Finanças) como ${profileType} e meu resultado indicou: ${recommendation.product}. Gostaria de agendar uma sessão estratégica.`;
   const whatsappUrl = `https://wa.me/${whatsappTargetNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+
+  const handleScheduleStrategicSession = () => {
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  };
 
   const handleCopySummary = () => {
     const lines = [
@@ -199,61 +212,14 @@ export const ResultReport: React.FC<ResultReportProps> = ({
         </div>
       </div>
 
-      {/* 6 Dimensions Breakdown */}
-      <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6 sm:p-8">
-        <div className="mb-6">
-          <h3 className="text-lg sm:text-xl font-bold text-[#0E1B33]">
-            Raio-X por Dimensões (Estágios Atuais)
-          </h3>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Análise detalhada do seu momento em cada uma das 6 pilastras do Método MIL.
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {Object.entries(dimensionResults).map(([key, dim]) => {
-            const styles = stageColorMap[dim.stageName] || stageColorMap['Sustentar'];
-
-            return (
-              <div 
-                key={key} 
-                id={`result-card-${key}`}
-                className="p-5 rounded-xl border border-slate-200 bg-white flex flex-col justify-between hover:border-[#C59B68]/40 hover:shadow-sm transition-all"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-bold text-[#0E1B33] text-sm">{dim.title}</span>
-                    <span className={cn("text-xs font-bold px-2.5 py-1 rounded-full border", styles.badge)}>
-                      {dim.stageName}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 leading-relaxed mb-4">
-                    {dim.description}
-                  </p>
-                </div>
-                
-                <div className="space-y-1.5 pt-2 border-t border-slate-100">
-                  <div className="flex justify-between text-[10px] text-slate-400 uppercase font-bold tracking-wider">
-                    <span>Sustentar</span>
-                    <span>Organizar</span>
-                    <span>Construir</span>
-                    <span>Expandir</span>
-                  </div>
-                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden flex">
-                    <div 
-                      className={cn("h-full rounded-full transition-all duration-700", styles.bar)}
-                      style={{ width: `${(dim.stageNum / 4) * 100}%` }}
-                    />
-                  </div>
-                  <div className="text-right text-[11px] text-slate-500 font-medium">
-                    Índice: <strong className="text-[#0E1B33] font-bold">{dim.avg.toFixed(1)}</strong> de 4.0
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      {/* Roda da Prosperidade (Mapa Radar Hexagonal + Dimensões + Índice + Focos) */}
+      <RodaDaProsperidade
+        dimensionResults={dimensionResults}
+        overallAvg={overallAvg}
+        lead={lead}
+        answers={answers}
+        onScheduleStrategicSession={handleScheduleStrategicSession}
+      />
 
       {/* Business Module Evaluation (if CNPJ was chosen) */}
       {hasBusiness && (

@@ -56,9 +56,8 @@ export const RodaDaProsperidade: React.FC<RodaDaProsperidadeProps> = ({
   const maxRadius = 150;
   const numLevels = 4; // Sustentar, Organizar, Construir, Expandir
 
-  // Compute angles for regular hexagon (-60° for top-right, 0° for right, 60° for bottom-right, etc.)
-  // Angles in degrees: -60, 0, 60, 120, 180, 240
-  const anglesDeg = [-60, 0, 60, 120, 180, 240];
+  // Compute angles for regular hexagon (-90° top, -30° top-right, 30° bottom-right, 90° bottom, 150° bottom-left, 210° top-left)
+  const anglesDeg = [-90, -30, 30, 90, 150, 210];
   const anglesRad = anglesDeg.map(d => (d * Math.PI) / 180);
 
   // Hexagonal grid points for each level (1 to 4)
@@ -76,14 +75,14 @@ export const RodaDaProsperidade: React.FC<RodaDaProsperidadeProps> = ({
   const userVertices = dimensionKeys.map((key, i) => {
     const dim = dimensionResults[key];
     const score = dim ? dim.avg : 1.0;
-    // Map score 1.0..4.0 to radius (minimum 36px so it wraps the center badge neatly, max maxRadius)
+    // Map score 1.0..4.0 to radius (minimum 38px so it wraps the center badge neatly, max maxRadius)
     const minR = 38;
     const normalized = (score - 1.0) / 3.0; // 0 to 1
     const r = minR + normalized * (maxRadius - minR);
     const angle = anglesRad[i];
     const x = cx + r * Math.cos(angle);
     const y = cy + r * Math.sin(angle);
-    return { x, y, score, key, dim };
+    return { x, y, score, key, dim, angle };
   });
 
   const userPolygonPoints = userVertices.map(v => `${v.x.toFixed(1)},${v.y.toFixed(1)}`).join(' ');
@@ -95,7 +94,7 @@ export const RodaDaProsperidade: React.FC<RodaDaProsperidadeProps> = ({
     return scoreA - scoreB;
   });
 
-  const topPriorities = sortedByScore.slice(0, 4);
+  const topPriorities = sortedByScore.slice(0, 3);
 
   // Overall Stage interpretation text
   let overallStageTitle = 'Sustentar';
@@ -124,18 +123,18 @@ export const RodaDaProsperidade: React.FC<RodaDaProsperidadeProps> = ({
   return (
     <div id="mapa-da-prosperidade-container" className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200/80 overflow-hidden">
       {/* Top Header Section */}
-      <div className="p-6 sm:p-8 border-b border-slate-100 bg-gradient-to-b from-[#FAF8F5]/60 to-white">
+      <div className="p-6 sm:p-8 border-b border-slate-100 bg-gradient-to-b from-[#FAF8F5]/80 to-white">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#8C6934] bg-[#FAF6EE] px-2.5 py-1 rounded-md border border-[#E9D7BC]">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#8C6934] bg-[#FAF6EE] px-3 py-1 rounded-md border border-[#E9D7BC]">
                 MAPA DA PROSPERIDADE
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0E1B33] tracking-tight">
               Seu momento em cada dimensão
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 mt-1.5 max-w-2xl leading-relaxed">
               Uma visão integrada da sua vida financeira, mostrando onde você está hoje e os próximos movimentos para construir a vida que deseja.
             </p>
           </div>
@@ -144,7 +143,7 @@ export const RodaDaProsperidade: React.FC<RodaDaProsperidadeProps> = ({
           <div className="flex flex-col items-start md:items-end shrink-0 pt-2 md:pt-0">
             <div className="flex items-center gap-2">
               <span className="text-xs font-black tracking-widest text-[#0E1B33]">MÉTODO MIL®</span>
-              <span className="text-[10px] uppercase font-bold text-[#8C6934] tracking-wider bg-[#FAF6EE] px-2 py-0.5 rounded border border-[#E9D7BC]">
+              <span className="text-[10px] uppercase font-bold text-[#8C6934] tracking-wider bg-[#FAF6EE] px-2.5 py-0.5 rounded border border-[#E9D7BC]">
                 INSPIRAR FINANÇAS
               </span>
             </div>
@@ -163,215 +162,213 @@ export const RodaDaProsperidade: React.FC<RodaDaProsperidadeProps> = ({
         </div>
       </div>
 
-      {/* Main Grid: Left (Radar + Stepper) & Right (Gauge, Distribution, Suggested Focus) */}
-      <div className="p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        {/* Left Column (Radar + Stages) */}
-        <div className="lg:col-span-7 xl:col-span-8 space-y-8">
+      {/* Section 1: Overview Grid (Left: Radar Hexagon + Legend | Right: Arc Gauge, Distribution & Focuses) */}
+      <div className="p-6 sm:p-8 bg-[#FAF8F5]/30 border-b border-slate-100">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           
-          {/* Hexagonal Radar Section */}
-          <div className="bg-[#FAF8F5]/50 rounded-2xl p-4 sm:p-6 border border-[#EFE5D5] flex flex-col items-center relative">
-            
-            {/* Dimension Callout Cards surrounding the Radar */}
-            <div className="w-full">
-              {/* Desktop & Tablet Circular Layout Wrapper */}
-              <div className="relative w-full max-w-[620px] mx-auto min-h-[460px] sm:min-h-[520px] flex items-center justify-center">
-                
-                {/* The SVG Radar Graph */}
-                <svg 
-                  viewBox="0 0 540 500" 
-                  className="w-full max-w-[500px] h-auto drop-shadow-xs select-none"
-                >
-                  <defs>
-                    <radialGradient id="radarGoldGradient" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stopColor="#C59B68" stopOpacity="0.38" />
-                      <stop offset="100%" stopColor="#8C6934" stopOpacity="0.15" />
-                    </radialGradient>
-                    <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
-                      <feGaussianBlur stdDeviation="3" result="blur" />
-                      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                    </filter>
-                  </defs>
+          {/* Left: Hexagonal Radar Graph */}
+          <div className="lg:col-span-7 bg-white rounded-3xl p-5 sm:p-7 border border-slate-200/80 shadow-xs flex flex-col items-center justify-between">
+            <div className="w-full text-center sm:text-left mb-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#8C6934] bg-[#FAF6EE] px-2.5 py-0.5 rounded border border-[#E9D7BC]">
+                VISÃO GEOMÉTRICA
+              </span>
+              <h3 className="text-lg font-bold text-[#0E1B33] mt-1">
+                Roda da Prosperidade Integrada
+              </h3>
+            </div>
 
-                  {/* Concentric Hexagon Grid Levels */}
-                  {gridPolygons.map(({ level, points }) => (
-                    <polygon
-                      key={`grid-${level}`}
-                      points={points}
-                      fill={level % 2 === 0 ? '#FAF6EE' : '#FFFFFF'}
-                      fillOpacity="0.45"
-                      stroke="#E9D7BC"
-                      strokeWidth={level === 4 ? "1.8" : "1"}
-                      strokeDasharray={level === 4 ? undefined : "3 3"}
-                    />
-                  ))}
+            {/* SVG Radar */}
+            <div className="relative w-full max-w-[480px] mx-auto flex items-center justify-center my-2">
+              <svg 
+                viewBox="0 0 540 500" 
+                className="w-full h-auto drop-shadow-xs select-none"
+              >
+                <defs>
+                  <radialGradient id="radarGoldGradient" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#C59B68" stopOpacity="0.45" />
+                    <stop offset="100%" stopColor="#8C6934" stopOpacity="0.18" />
+                  </radialGradient>
+                  <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
 
-                  {/* 6 Radial Axes from Center */}
-                  {anglesRad.map((angle, i) => {
-                    const outerX = cx + maxRadius * Math.cos(angle);
-                    const outerY = cy + maxRadius * Math.sin(angle);
-                    return (
-                      <line
-                        key={`axis-${i}`}
-                        x1={cx}
-                        y1={cy}
-                        x2={outerX}
-                        y2={outerY}
-                        stroke="#E9D7BC"
-                        strokeWidth="1.2"
-                      />
-                    );
-                  })}
-
-                  {/* User's Score Polygon */}
+                {/* Concentric Hexagon Grid Levels */}
+                {gridPolygons.map(({ level, points }) => (
                   <polygon
-                    points={userPolygonPoints}
-                    fill="url(#radarGoldGradient)"
-                    stroke="#C59B68"
-                    strokeWidth="2.5"
-                    strokeLinejoin="round"
-                    className="transition-all duration-700 ease-out"
-                    filter="url(#goldGlow)"
+                    key={`grid-${level}`}
+                    points={points}
+                    fill={level % 2 === 0 ? '#FAF6EE' : '#FFFFFF'}
+                    fillOpacity="0.5"
+                    stroke="#E9D7BC"
+                    strokeWidth={level === 4 ? "1.8" : "1"}
+                    strokeDasharray={level === 4 ? undefined : "3 3"}
                   />
+                ))}
 
-                  {/* Vertices Nodes */}
-                  {userVertices.map((v, i) => (
-                    <g key={`vertex-${i}`} className="cursor-pointer" onClick={() => setSelectedDimId(v.key)}>
-                      <circle
-                        cx={v.x}
-                        cy={v.y}
-                        r="7"
-                        fill="#FFFFFF"
-                        stroke="#C59B68"
-                        strokeWidth="2.5"
-                        className="hover:scale-125 transition-transform"
-                      />
-                      <circle
-                        cx={v.x}
-                        cy={v.y}
-                        r="3.5"
-                        fill="#8C6934"
-                      />
-                    </g>
-                  ))}
+                {/* 6 Radial Axes from Center */}
+                {anglesRad.map((angle, i) => {
+                  const outerX = cx + maxRadius * Math.cos(angle);
+                  const outerY = cy + maxRadius * Math.sin(angle);
+                  return (
+                    <line
+                      key={`axis-${i}`}
+                      x1={cx}
+                      y1={cy}
+                      x2={outerX}
+                      y2={outerY}
+                      stroke="#E9D7BC"
+                      strokeWidth="1.2"
+                    />
+                  );
+                })}
 
-                  {/* Center Circle Badge */}
-                  <g className="select-none">
-                    <circle 
-                      cx={cx} 
-                      cy={cy} 
-                      r="44" 
-                      fill="#FAF6EE" 
-                      stroke="#E9D7BC" 
-                      strokeWidth="2" 
+                {/* User's Score Polygon */}
+                <polygon
+                  points={userPolygonPoints}
+                  fill="url(#radarGoldGradient)"
+                  stroke="#C59B68"
+                  strokeWidth="2.8"
+                  strokeLinejoin="round"
+                  className="transition-all duration-700 ease-out"
+                  filter="url(#goldGlow)"
+                />
+
+                {/* Vertices Nodes */}
+                {userVertices.map((v, i) => (
+                  <g key={`vertex-${i}`} className="cursor-pointer" onClick={() => setSelectedDimId(v.key)}>
+                    <circle
+                      cx={v.x}
+                      cy={v.y}
+                      r="7.5"
+                      fill="#FFFFFF"
+                      stroke="#C59B68"
+                      strokeWidth="2.5"
+                      className="hover:scale-125 transition-transform"
                     />
-                    <circle 
-                      cx={cx} 
-                      cy={cy} 
-                      r="40" 
-                      fill="#FFFFFF" 
-                      stroke="#C59B68" 
-                      strokeWidth="1" 
-                      strokeDasharray="2.5 2.5" 
+                    <circle
+                      cx={v.x}
+                      cy={v.y}
+                      r="3.5"
+                      fill="#8C6934"
                     />
-                    <text 
-                      x={cx} 
-                      y={cy - 10} 
-                      textAnchor="middle" 
-                      fontSize="7.5" 
-                      fontWeight="800" 
-                      fill="#0E1B33" 
-                      letterSpacing="0.08em"
-                    >
-                      SUA
-                    </text>
-                    <text 
-                      x={cx} 
-                      y={cy - 1} 
-                      textAnchor="middle" 
-                      fontSize="7" 
-                      fontWeight="800" 
-                      fill="#8C6934" 
-                      letterSpacing="0.08em"
-                    >
-                      PROSPERIDADE
-                    </text>
-                    <text 
-                      x={cx} 
-                      y={cy + 9} 
-                      textAnchor="middle" 
-                      fontSize="6.5" 
-                      fontWeight="700" 
-                      fill="#64748B"
-                    >
-                      EM
-                    </text>
-                    <text 
-                      x={cx} 
-                      y={cy + 18} 
-                      textAnchor="middle" 
-                      fontSize="7.5" 
-                      fontWeight="800" 
-                      fill="#0E1B33" 
-                      letterSpacing="0.08em"
-                    >
-                      CONSTRUÇÃO
-                    </text>
                   </g>
-                </svg>
+                ))}
 
-              </div>
-            </div>
+                {/* Outer Axis Labels */}
+                {dimensionKeys.map((key, i) => {
+                  const meta = getDimensionMeta(key);
+                  const result = dimensionResults[key];
+                  const score = result ? result.avg : 1.0;
+                  const angle = anglesRad[i];
+                  const labelRadius = maxRadius + 32;
+                  const lx = cx + labelRadius * Math.cos(angle);
+                  const ly = cy + labelRadius * Math.sin(angle);
 
-            {/* 6 Dimension Cards in Responsive 2x3 Grid */}
-            <div className="w-full grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 mt-4">
-              {dimensionKeys.map((key) => {
-                const meta = getDimensionMeta(key);
-                const result = dimensionResults[key];
-                const score = result ? result.avg : 1.0;
-                const IconComponent = iconMap[key] || Coins;
+                  let textAnchor: 'start' | 'end' | 'middle' = 'middle';
+                  if (Math.cos(angle) > 0.3) textAnchor = 'start';
+                  else if (Math.cos(angle) < -0.3) textAnchor = 'end';
 
-                return (
-                  <div
-                    key={key}
-                    onClick={() => setSelectedDimId(key)}
-                    className="p-3.5 rounded-xl bg-white border border-slate-200 hover:border-[#C59B68] hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group"
+                  return (
+                    <g 
+                      key={`label-${key}`}
+                      onClick={() => setSelectedDimId(key)}
+                      className="cursor-pointer group"
+                    >
+                      <text
+                        x={lx}
+                        y={ly - 4}
+                        textAnchor={textAnchor}
+                        fontSize="11.5"
+                        fontWeight="700"
+                        fill="#0E1B33"
+                        className="hover:fill-[#C59B68] transition-colors"
+                      >
+                        {meta.title}
+                      </text>
+                      <text
+                        x={lx}
+                        y={ly + 10}
+                        textAnchor={textAnchor}
+                        fontSize="10"
+                        fontWeight="800"
+                        fill="#8C6934"
+                      >
+                        {score.toFixed(1)} / 4.0
+                      </text>
+                    </g>
+                  );
+                })}
+
+                {/* Center Circle Badge */}
+                <g className="select-none">
+                  <circle 
+                    cx={cx} 
+                    cy={cy} 
+                    r="44" 
+                    fill="#FAF6EE" 
+                    stroke="#E9D7BC" 
+                    strokeWidth="2" 
+                  />
+                  <circle 
+                    cx={cx} 
+                    cy={cy} 
+                    r="40" 
+                    fill="#FFFFFF" 
+                    stroke="#C59B68" 
+                    strokeWidth="1" 
+                    strokeDasharray="2.5 2.5" 
+                  />
+                  <text 
+                    x={cx} 
+                    y={cy - 10} 
+                    textAnchor="middle" 
+                    fontSize="7.5" 
+                    fontWeight="800" 
+                    fill="#0E1B33" 
+                    letterSpacing="0.08em"
                   >
-                    <div>
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-7 h-7 rounded-lg ${meta.badgeBg} flex items-center justify-center text-white shrink-0 shadow-2xs`}>
-                            <IconComponent className="w-4 h-4 text-amber-200" />
-                          </div>
-                          <span className="font-bold text-xs text-[#0E1B33] group-hover:text-[#8C6934] transition-colors">
-                            {meta.title}
-                          </span>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <span className="text-xs font-black text-[#0E1B33]">{score.toFixed(1)}</span>
-                          <span className="text-[10px] text-slate-400 font-semibold"> / 4.0</span>
-                        </div>
-                      </div>
-                      <p className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed">
-                        {result?.description || meta.stageDescriptions.Sustentar}
-                      </p>
-                    </div>
-
-                    <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#8C6934] bg-[#FAF6EE] px-2 py-0.5 rounded border border-[#E9D7BC]">
-                        {result?.stageName || 'Sustentar'}
-                      </span>
-                      <span className="text-[#8C6934] font-bold group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
-                        Ver detalhes →
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+                    SUA
+                  </text>
+                  <text 
+                    x={cx} 
+                    y={cy - 1} 
+                    textAnchor="middle" 
+                    fontSize="7" 
+                    fontWeight="800" 
+                    fill="#8C6934" 
+                    letterSpacing="0.08em"
+                  >
+                    PROSPERIDADE
+                  </text>
+                  <text 
+                    x={cx} 
+                    y={cy + 9} 
+                    textAnchor="middle" 
+                    fontSize="6.5" 
+                    fontWeight="700" 
+                    fill="#64748B"
+                  >
+                    EM
+                  </text>
+                  <text 
+                    x={cx} 
+                    y={cy + 18} 
+                    textAnchor="middle" 
+                    fontSize="7.5" 
+                    fontWeight="800" 
+                    fill="#0E1B33" 
+                    letterSpacing="0.08em"
+                  >
+                    CONSTRUÇÃO
+                  </text>
+                </g>
+              </svg>
             </div>
 
-            {/* Radar Legend (as shown in the reference image) */}
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-6 pt-4 border-t border-[#EFE5D5] w-full text-xs text-slate-600">
+            {/* Radar Legend: Clean, balanced single row */}
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-4 pt-3 border-t border-[#EFE5D5] w-full text-xs text-slate-600">
               <div className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-full bg-[#C59B68] ring-2 ring-[#FAF6EE] ring-offset-1" />
                 <span className="font-semibold text-slate-800">Seu momento atual</span>
@@ -389,244 +386,349 @@ export const RodaDaProsperidade: React.FC<RodaDaProsperidadeProps> = ({
                 <span>Potencial máximo</span>
               </div>
             </div>
-
           </div>
 
-          {/* OS ESTÁGIOS DO SEU DESENVOLVIMENTO EM CADA DIMENSÃO */}
-          <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-[#8C6934] mb-3 text-center sm:text-left">
-              OS ESTÁGIOS DO SEU DESENVOLVIMENTO EM CADA DIMENSÃO
-            </h4>
+          {/* Right: Semicircular Gauge & Distribution */}
+          <div className="lg:col-span-5 flex flex-col justify-between space-y-6">
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 relative">
-              {/* Stage 1: Sustentar */}
-              <div className={`p-4 rounded-xl border flex flex-col justify-between text-center relative ${overallStageTitle === 'Sustentar' ? 'bg-[#FAF6EE] border-[#C59B68] shadow-xs ring-1 ring-[#C59B68]' : 'bg-slate-50 border-slate-200'}`}>
-                {overallStageTitle === 'Sustentar' && (
-                  <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-[#0E1B33] text-[#C59B68]">
-                    Seu Nível Geral
+            {/* Card: ÍNDICE GERAL DA PROSPERIDADE */}
+            <div className="bg-[#FAF8F5] rounded-3xl p-6 border border-[#EFE5D5]">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#8C6934]">
+                  ÍNDICE GERAL DA PROSPERIDADE
+                </h4>
+                <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-[#0E1B33] text-[#C59B68]">
+                  ESTÁGIO: {overallStageTitle}
+                </span>
+              </div>
+
+              {/* Semicircular Arc Gauge */}
+              <div className="relative w-48 h-26 mx-auto flex items-end justify-center overflow-hidden my-1">
+                <svg viewBox="0 0 160 85" className="w-full h-full">
+                  <path
+                    d="M 15 80 A 65 65 0 0 1 145 80"
+                    fill="none"
+                    stroke="#E9D7BC"
+                    strokeWidth="14"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M 15 80 A 65 65 0 0 1 145 80"
+                    fill="none"
+                    stroke="#C59B68"
+                    strokeWidth="14"
+                    strokeLinecap="round"
+                    strokeDasharray="204.2"
+                    strokeDashoffset={204.2 * (1 - (overallAvg / 4.0))}
+                    className="transition-all duration-1000 ease-out"
+                  />
+                </svg>
+
+                <div className="absolute bottom-1 text-center">
+                  <span className="text-3xl sm:text-4xl font-black text-[#0E1B33] leading-none block">
+                    {overallAvg.toFixed(1)}
                   </span>
-                )}
-                <div>
-                  <div className="w-8 h-8 rounded-full bg-white border border-[#E9D7BC] mx-auto flex items-center justify-center text-[#8C6934] mb-2 shadow-2xs">
-                    <Sprout className="w-4 h-4" />
-                  </div>
-                  <h5 className="font-black text-xs text-[#0E1B33] uppercase tracking-wider">SUSTENTAR</h5>
-                  <p className="text-[11px] text-slate-600 mt-1 leading-snug">
-                    Resolver o agora e garantir o essencial.
-                  </p>
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    de 4.0
+                  </span>
                 </div>
               </div>
 
-              {/* Stage 2: Organizar */}
-              <div className={`p-4 rounded-xl border flex flex-col justify-between text-center relative ${overallStageTitle === 'Organizar' ? 'bg-[#FAF6EE] border-[#C59B68] shadow-xs ring-1 ring-[#C59B68]' : 'bg-slate-50 border-slate-200'}`}>
-                {overallStageTitle === 'Organizar' && (
-                  <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-[#0E1B33] text-[#C59B68]">
-                    Seu Nível Geral
-                  </span>
-                )}
-                <div>
-                  <div className="w-8 h-8 rounded-full bg-white border border-[#E9D7BC] mx-auto flex items-center justify-center text-[#8C6934] mb-2 shadow-2xs">
-                    <ListChecks className="w-4 h-4" />
-                  </div>
-                  <h5 className="font-black text-xs text-[#0E1B33] uppercase tracking-wider">ORGANIZAR</h5>
-                  <p className="text-[11px] text-slate-600 mt-1 leading-snug">
-                    Estruturar, criar base e ganhar consistência.
-                  </p>
+              <p className="text-xs text-slate-600 leading-relaxed text-center mt-3">
+                {overallStageNarrative}
+              </p>
+
+              {/* Tip Card */}
+              <div className="mt-4 p-3 rounded-xl bg-white border border-[#E9D7BC] flex items-start gap-2.5">
+                <div className="p-1 rounded-md bg-[#FAF6EE] text-[#C59B68] shrink-0 mt-0.5">
+                  <Lightbulb className="w-4 h-4" />
                 </div>
+                <p className="text-[11px] text-slate-700 leading-relaxed font-medium">
+                  Este é o seu ponto de partida estratégico. Com clareza e método, você pode avançar um estágio de cada vez.
+                </p>
+              </div>
+            </div>
+
+            {/* Card: SUA DISTRIBUIÇÃO ATUAL & FOCOS */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#8C6934]">
+                  SUA DISTRIBUIÇÃO ATUAL
+                </h4>
+                <span className="text-[11px] text-slate-400 font-semibold">
+                  Média por dimensão
+                </span>
               </div>
 
-              {/* Stage 3: Construir */}
-              <div className={`p-4 rounded-xl border flex flex-col justify-between text-center relative ${overallStageTitle === 'Construir' ? 'bg-[#FAF6EE] border-[#C59B68] shadow-xs ring-1 ring-[#C59B68]' : 'bg-slate-50 border-slate-200'}`}>
-                {overallStageTitle === 'Construir' && (
-                  <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-[#0E1B33] text-[#C59B68]">
-                    Seu Nível Geral
-                  </span>
-                )}
-                <div>
-                  <div className="w-8 h-8 rounded-full bg-white border border-[#E9D7BC] mx-auto flex items-center justify-center text-[#8C6934] mb-2 shadow-2xs">
-                    <BarChart3 className="w-4 h-4" />
-                  </div>
-                  <h5 className="font-black text-xs text-[#0E1B33] uppercase tracking-wider">CONSTRUIR</h5>
-                  <p className="text-[11px] text-slate-600 mt-1 leading-snug">
-                    Investir, ampliar e gerar resultados.
-                  </p>
-                </div>
+              <div className="space-y-2.5">
+                {dimensionKeys.map((key) => {
+                  const meta = getDimensionMeta(key);
+                  const result = dimensionResults[key];
+                  const score = result ? result.avg : 1.0;
+
+                  return (
+                    <div 
+                      key={key}
+                      onClick={() => setSelectedDimId(key)}
+                      className="flex items-center justify-between gap-3 text-xs cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg transition-colors group"
+                    >
+                      <span className="font-semibold text-slate-700 w-22 shrink-0 group-hover:text-[#0E1B33]">
+                        {meta.title}
+                      </span>
+
+                      {/* Horizontal Bar */}
+                      <div className="flex-1 bg-slate-100 h-2.5 rounded-full overflow-hidden relative">
+                        <div 
+                          className="h-full rounded-full bg-gradient-to-r from-[#D4AF7A] to-[#C59B68] transition-all duration-700"
+                          style={{ width: `${Math.max(15, (score / 4.0) * 100)}%` }}
+                        />
+                      </div>
+
+                      <span className="font-bold text-[#0E1B33] w-12 text-right shrink-0">
+                        {score.toFixed(1)} <span className="text-[10px] text-slate-400">/ 4</span>
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
 
-              {/* Stage 4: Expandir */}
-              <div className={`p-4 rounded-xl border flex flex-col justify-between text-center relative ${overallStageTitle === 'Expandir' ? 'bg-[#FAF6EE] border-[#C59B68] shadow-xs ring-1 ring-[#C59B68]' : 'bg-slate-50 border-slate-200'}`}>
-                {overallStageTitle === 'Expandir' && (
-                  <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-[#0E1B33] text-[#C59B68]">
-                    Seu Nível Geral
-                  </span>
-                )}
-                <div>
-                  <div className="w-8 h-8 rounded-full bg-white border border-[#E9D7BC] mx-auto flex items-center justify-center text-[#8C6934] mb-2 shadow-2xs">
-                    <Compass className="w-4 h-4" />
-                  </div>
-                  <h5 className="font-black text-xs text-[#0E1B33] uppercase tracking-wider">EXPANDIR</h5>
-                  <p className="text-[11px] text-slate-600 mt-1 leading-snug">
-                    Multiplicar, gerar impacto e deixar um legado.
-                  </p>
+              {/* Próximos Focos */}
+              <div className="mt-5 pt-4 border-t border-slate-100">
+                <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">
+                  PRÓXIMOS FOCOS PRIORITÁRIOS:
+                </h5>
+                <div className="space-y-2">
+                  {topPriorities.map((key, idx) => {
+                    const meta = getDimensionMeta(key);
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setSelectedDimId(key)}
+                        className="w-full flex items-center justify-between p-2 rounded-xl border border-slate-100 bg-[#FAF8F5]/80 hover:bg-[#FAF6EE] hover:border-[#E9D7BC] transition-colors text-left cursor-pointer group"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-full bg-[#C59B68] text-white font-extrabold text-[10px] flex items-center justify-center shrink-0">
+                            {idx + 1}
+                          </span>
+                          <span className="text-xs font-semibold text-slate-800 group-hover:text-[#0E1B33]">
+                            {meta.suggestedFocus}
+                          </span>
+                        </div>
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#8C6934] group-hover:translate-x-0.5 transition-all shrink-0" />
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
+
           </div>
 
         </div>
+      </div>
 
-        {/* Right Column (Índice Geral, Distribuição Atual, Próximos Focos & CTA) */}
-        <div className="lg:col-span-5 xl:col-span-4 space-y-6">
+      {/* Section 2: Diagnóstico Detalhado das 6 Dimensões (Generous 3-Column Grid) */}
+      <div className="p-6 sm:p-8 bg-white border-b border-slate-100">
+        <div className="max-w-3xl mb-6">
+          <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#8C6934] bg-[#FAF6EE] px-3 py-1 rounded-md border border-[#E9D7BC]">
+            ANÁLISE DETALHADA
+          </span>
+          <h3 className="text-xl sm:text-2xl font-extrabold text-[#0E1B33] mt-2">
+            Diagnóstico das 6 Dimensões do Método MIL
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-600 mt-1">
+            Clique em cada dimensão para ver a interpretação completa do seu momento, as recomendações estratégicas e suas respostas.
+          </p>
+        </div>
 
-          {/* Card: ÍNDICE GERAL DA PROSPERIDADE */}
-          <div className="bg-[#FAF8F5] rounded-2xl p-6 border border-[#EFE5D5]">
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#8C6934] text-center mb-4">
-              ÍNDICE GERAL DA PROSPERIDADE
-            </h4>
+        {/* 6 Dimensions in Spacious Grid (3 cols on desktop, 2 on tablet, 1 on mobile) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {dimensionKeys.map((key) => {
+            const meta = getDimensionMeta(key);
+            const dimDef = DIMENSIONS.find(d => d.id === key);
+            const result = dimensionResults[key];
+            const score = result ? result.avg : 1.0;
+            const IconComponent = iconMap[key] || Coins;
+            const percentage = (score / 4.0) * 100;
 
-            {/* Semicircular Arc Gauge */}
-            <div className="relative w-44 h-24 mx-auto flex items-end justify-center overflow-hidden">
-              <svg viewBox="0 0 160 85" className="w-full h-full">
-                {/* Background arc */}
-                <path
-                  d="M 15 80 A 65 65 0 0 1 145 80"
-                  fill="none"
-                  stroke="#E9D7BC"
-                  strokeWidth="14"
-                  strokeLinecap="round"
-                />
-                {/* Foreground progress arc */}
-                <path
-                  d="M 15 80 A 65 65 0 0 1 145 80"
-                  fill="none"
-                  stroke="#C59B68"
-                  strokeWidth="14"
-                  strokeLinecap="round"
-                  strokeDasharray="204.2"
-                  strokeDashoffset={204.2 * (1 - (overallAvg / 4.0))}
-                  className="transition-all duration-1000 ease-out"
-                />
-              </svg>
-
-              {/* Central number inside arc */}
-              <div className="absolute bottom-1 text-center">
-                <span className="text-3xl font-black text-[#0E1B33] leading-none block">
-                  {overallAvg.toFixed(1)}
-                </span>
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                  de 4.0
-                </span>
-              </div>
-            </div>
-
-            <p className="text-xs text-slate-600 leading-relaxed text-center mt-3">
-              {overallStageNarrative}
-            </p>
-
-            {/* Tip Card */}
-            <div className="mt-4 p-3.5 rounded-xl bg-white border border-[#E9D7BC] flex items-start gap-2.5">
-              <div className="p-1 rounded-md bg-[#FAF6EE] text-[#C59B68] shrink-0 mt-0.5">
-                <Lightbulb className="w-4 h-4" />
-              </div>
-              <p className="text-[11px] text-slate-700 leading-relaxed font-medium">
-                Este é um ponto de partida, não um limite. Com clareza e estratégia, você pode avançar um estágio de cada vez.
-              </p>
-            </div>
-          </div>
-
-          {/* Card: SUA DISTRIBUIÇÃO ATUAL */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200">
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#8C6934] mb-4">
-              SUA DISTRIBUIÇÃO ATUAL
-            </h4>
-
-            <div className="space-y-3">
-              {dimensionKeys.map((key) => {
-                const meta = getDimensionMeta(key);
-                const result = dimensionResults[key];
-                const score = result ? result.avg : 1.0;
-                const percentage = ((score - 1) / 3) * 100;
-
-                return (
-                  <div 
-                    key={key}
-                    onClick={() => setSelectedDimId(key)}
-                    className="flex items-center justify-between gap-3 text-xs cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg transition-colors group"
-                  >
-                    <span className="font-semibold text-slate-700 w-20 shrink-0 group-hover:text-[#0E1B33]">
-                      {meta.shortTitle}
-                    </span>
-
-                    {/* Horizontal Bar */}
-                    <div className="flex-1 bg-slate-100 h-2.5 rounded-full overflow-hidden relative">
-                      <div 
-                        className="h-full rounded-full bg-gradient-to-r from-[#D4AF7A] to-[#C59B68] transition-all duration-700"
-                        style={{ width: `${Math.max(15, (score / 4.0) * 100)}%` }}
-                      />
-                    </div>
-
-                    <span className="font-bold text-[#0E1B33] w-7 text-right shrink-0">
-                      {score.toFixed(1)}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Card: PRÓXIMOS FOCOS SUGERIDOS */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200">
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#8C6934] mb-3">
-              PRÓXIMOS FOCOS SUGERIDOS
-            </h4>
-
-            <div className="space-y-2.5">
-              {topPriorities.map((key, idx) => {
-                const meta = getDimensionMeta(key);
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setSelectedDimId(key)}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl border border-slate-100 bg-slate-50/70 hover:bg-[#FAF6EE] hover:border-[#E9D7BC] transition-colors text-left cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span className="w-5 h-5 rounded-full bg-[#C59B68] text-white font-extrabold text-[11px] flex items-center justify-center shrink-0">
-                        {idx + 1}
-                      </span>
-                      <span className="text-xs font-semibold text-slate-800 group-hover:text-[#0E1B33]">
-                        {meta.suggestedFocus}
-                      </span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#8C6934] group-hover:translate-x-0.5 transition-all shrink-0" />
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Final CTA Button: Agendar Sessão Estratégica com a Inspirar Finanças */}
-            <div className="mt-6 pt-5 border-t border-slate-100">
-              <button
-                id="btn-agenda-sessao-estrategica"
-                type="button"
-                onClick={onScheduleStrategicSession}
-                className="w-full flex items-center justify-center gap-2 bg-[#0E1B33] hover:bg-[#182C50] text-[#C59B68] hover:text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-[#0E1B33]/20 transition-all text-xs sm:text-sm cursor-pointer border border-[#C59B68]/30 group"
+            return (
+              <div
+                key={key}
+                onClick={() => setSelectedDimId(key)}
+                className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-[#C59B68] hover:shadow-lg hover:shadow-slate-100 transition-all cursor-pointer flex flex-col justify-between group"
               >
-                <span>Agendar Sessão Estratégica com a Inspirar Finanças</span>
-                <ArrowRight className="w-4 h-4 text-[#C59B68] group-hover:translate-x-1 transition-transform" />
-              </button>
-              <p className="text-[11px] text-slate-500 text-center mt-2 leading-relaxed">
-                Converse diretamente com um consultor especialista para montar seu plano sob medida.
+                <div>
+                  {/* Top Bar: Icon + Title + Score Badge */}
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-9 h-9 rounded-xl ${meta.badgeBg} flex items-center justify-center text-white shrink-0 shadow-xs`}>
+                        <IconComponent className="w-5 h-5 text-amber-200" />
+                      </div>
+                      <div>
+                        <span className="font-extrabold text-sm text-[#0E1B33] group-hover:text-[#8C6934] transition-colors block">
+                          {meta.title}
+                        </span>
+                        <span className="text-[11px] text-slate-500 italic block leading-tight">
+                          {dimDef?.subtitle || meta.suggestedFocus}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Dedicated Score Badge (Guaranteed No Overflow) */}
+                    <div className="flex items-center gap-1 bg-[#FAF6EE] text-[#0E1B33] px-2.5 py-1 rounded-lg border border-[#E9D7BC] shrink-0 font-mono">
+                      <span className="text-sm font-black text-[#0E1B33]">{score.toFixed(1)}</span>
+                      <span className="text-[10px] text-slate-400 font-semibold">/ 4.0</span>
+                    </div>
+                  </div>
+
+                  {/* Micro Progress Line with 4 Stage Steps */}
+                  <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden my-3 relative">
+                    <div 
+                      className="h-full rounded-full bg-gradient-to-r from-[#D4AF7A] to-[#C59B68] transition-all duration-700"
+                      style={{ width: `${Math.max(15, percentage)}%` }}
+                    />
+                  </div>
+
+                  {/* Complete, Well-formatted Description */}
+                  <p className="text-xs text-slate-600 leading-relaxed min-h-[48px]">
+                    {result?.description || meta.stageDescriptions.Sustentar}
+                  </p>
+                </div>
+
+                {/* Bottom Bar: Stage Badge + Link */}
+                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8C6934] bg-[#FAF6EE] px-2.5 py-1 rounded-md border border-[#E9D7BC]">
+                    {result?.stageName || 'Sustentar'}
+                  </span>
+                  <span className="text-[#8C6934] font-bold group-hover:text-[#0E1B33] group-hover:translate-x-1 transition-all flex items-center gap-1 whitespace-nowrap">
+                    Ver detalhes →
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Section 3: OS ESTÁGIOS DO SEU DESENVOLVIMENTO EM CADA DIMENSÃO */}
+      <div className="p-6 sm:p-8 bg-[#FAF8F5]/50 border-b border-slate-100">
+        <div className="text-center sm:text-left mb-6">
+          <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#8C6934] bg-[#FAF6EE] px-3 py-1 rounded-md border border-[#E9D7BC]">
+            ESCALA METODOLÓGICA
+          </span>
+          <h4 className="text-lg sm:text-xl font-extrabold text-[#0E1B33] mt-2">
+            Os 4 Estágios do Desenvolvimento no Método MIL
+          </h4>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative">
+          {/* Stage 1: Sustentar */}
+          <div className={`p-5 rounded-2xl border flex flex-col justify-between text-center relative transition-all ${overallStageTitle === 'Sustentar' ? 'bg-[#FAF6EE] border-[#C59B68] shadow-sm ring-1 ring-[#C59B68]' : 'bg-white border-slate-200'}`}>
+            {overallStageTitle === 'Sustentar' && (
+              <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#0E1B33] text-[#C59B68]">
+                Seu Nível Geral
+              </span>
+            )}
+            <div>
+              <div className="w-10 h-10 rounded-full bg-white border border-[#E9D7BC] mx-auto flex items-center justify-center text-[#8C6934] mb-3 shadow-xs">
+                <Sprout className="w-5 h-5" />
+              </div>
+              <h5 className="font-black text-xs text-[#0E1B33] uppercase tracking-wider">1. SUSTENTAR</h5>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Resolver o agora, conter vazamentos e garantir o essencial da sobrevivência.
               </p>
             </div>
           </div>
 
-        </div>
+          {/* Stage 2: Organizar */}
+          <div className={`p-5 rounded-2xl border flex flex-col justify-between text-center relative transition-all ${overallStageTitle === 'Organizar' ? 'bg-[#FAF6EE] border-[#C59B68] shadow-sm ring-1 ring-[#C59B68]' : 'bg-white border-slate-200'}`}>
+            {overallStageTitle === 'Organizar' && (
+              <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#0E1B33] text-[#C59B68]">
+                Seu Nível Geral
+              </span>
+            )}
+            <div>
+              <div className="w-10 h-10 rounded-full bg-white border border-[#E9D7BC] mx-auto flex items-center justify-center text-[#8C6934] mb-3 shadow-xs">
+                <ListChecks className="w-5 h-5" />
+              </div>
+              <h5 className="font-black text-xs text-[#0E1B33] uppercase tracking-wider">2. ORGANIZAR</h5>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Estruturar rotinas, clarear números, criar base sólida e ganhar consistência.
+              </p>
+            </div>
+          </div>
 
+          {/* Stage 3: Construir */}
+          <div className={`p-5 rounded-2xl border flex flex-col justify-between text-center relative transition-all ${overallStageTitle === 'Construir' ? 'bg-[#FAF6EE] border-[#C59B68] shadow-sm ring-1 ring-[#C59B68]' : 'bg-white border-slate-200'}`}>
+            {overallStageTitle === 'Construir' && (
+              <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#0E1B33] text-[#C59B68]">
+                Seu Nível Geral
+              </span>
+            )}
+            <div>
+              <div className="w-10 h-10 rounded-full bg-white border border-[#E9D7BC] mx-auto flex items-center justify-center text-[#8C6934] mb-3 shadow-xs">
+                <BarChart3 className="w-5 h-5" />
+              </div>
+              <h5 className="font-black text-xs text-[#0E1B33] uppercase tracking-wider">3. CONSTRUIR</h5>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Investir com estratégia, blindar reservas e multiplicar patrimônio produtivo.
+              </p>
+            </div>
+          </div>
+
+          {/* Stage 4: Expandir */}
+          <div className={`p-5 rounded-2xl border flex flex-col justify-between text-center relative transition-all ${overallStageTitle === 'Expandir' ? 'bg-[#FAF6EE] border-[#C59B68] shadow-sm ring-1 ring-[#C59B68]' : 'bg-white border-slate-200'}`}>
+            {overallStageTitle === 'Expandir' && (
+              <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#0E1B33] text-[#C59B68]">
+                Seu Nível Geral
+              </span>
+            )}
+            <div>
+              <div className="w-10 h-10 rounded-full bg-white border border-[#E9D7BC] mx-auto flex items-center justify-center text-[#8C6934] mb-3 shadow-xs">
+                <Compass className="w-5 h-5" />
+              </div>
+              <h5 className="font-black text-xs text-[#0E1B33] uppercase tracking-wider">4. EXPANDIR</h5>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Alavancagem, governança executiva, geração de impacto e consolidação de legado.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Section 4: Final Strategic CTA Banner */}
+      <div className="p-6 sm:p-8 bg-white border-b border-slate-100">
+        <div className="bg-[#0E1B33] rounded-3xl p-6 sm:p-8 text-white border border-[#C59B68]/30 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-[#0E1B33]/15">
+          <div className="max-w-xl text-center md:text-left">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#C59B68] bg-[#FAF6EE]/10 px-3 py-1 rounded-md border border-[#C59B68]/30 inline-block mb-2">
+              PRÓXIMO PASSO RECOMENDADO
+            </span>
+            <h3 className="text-xl sm:text-2xl font-black text-white leading-tight">
+              Pronto para transformar seu diagnóstico em um plano estratégico de evolução?
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
+              Agende uma sessão individual com um consultor executivo da Inspirar Finanças para aprofundar suas dimensões e traçar seu plano sob medida.
+            </p>
+          </div>
+
+          <div className="shrink-0 w-full md:w-auto">
+            <button
+              id="btn-agenda-sessao-estrategica"
+              type="button"
+              onClick={onScheduleStrategicSession}
+              className="w-full md:w-auto flex items-center justify-center gap-2.5 bg-[#C59B68] hover:bg-[#D4AF7A] text-[#0E1B33] font-extrabold py-4 px-6 rounded-2xl shadow-lg transition-all text-xs sm:text-sm cursor-pointer group"
+            >
+              <MessageCircle className="w-4 h-4 text-[#0E1B33]" />
+              <span>Agendar Sessão Estratégica com a Inspirar Finanças</span>
+              <ArrowRight className="w-4 h-4 text-[#0E1B33] group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Bottom Brand Bar (from uploaded image) */}
-      <div className="bg-[#0E1B33] text-white px-6 py-4 border-t border-[#C59B68]/40 flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
+      <div className="bg-[#0E1B33] text-white px-6 py-4.5 border-t border-[#C59B68]/40 flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2">
           <span className="font-extrabold tracking-widest text-white text-xs">MÉTODO MIL®</span>
           <span className="text-[10px] text-[#C59B68] uppercase font-bold tracking-wider">INSPIRAR FINANÇAS</span>

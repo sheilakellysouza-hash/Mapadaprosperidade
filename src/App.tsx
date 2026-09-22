@@ -253,9 +253,11 @@ export default function App() {
     localStorage.removeItem('mil_business_ans');
   };
 
+  const isWideLayout = isAdminView || step === 'result';
+
   return (
-    <div className="min-h-screen bg-[#FBFBFC] text-[#0E1B33] py-8 sm:py-12 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-[#FBFBFC] text-[#0E1B33] py-6 sm:py-10 px-3 sm:px-6 lg:px-8 font-sans">
+      <div className={`${isWideLayout ? 'max-w-6xl' : 'max-w-4xl'} mx-auto transition-all duration-300`}>
         <Header 
           isAdminView={isAdminView} 
           onToggleAdmin={handleExitAdmin} 
@@ -264,7 +266,7 @@ export default function App() {
         {isAdminView ? (
           <AdminDashboard onBackToApp={handleExitAdmin} />
         ) : (
-          <div className="max-w-3xl mx-auto">
+          <div className={`${isWideLayout ? 'max-w-full' : 'max-w-3xl'} mx-auto transition-all duration-300`}>
             {step === 'welcome' && (
               <WelcomeStep 
                 lead={lead} 

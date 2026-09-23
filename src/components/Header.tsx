@@ -1,12 +1,13 @@
 import React from 'react';
-import { Sparkles, ArrowLeft } from 'lucide-react';
+import { Sparkles, ArrowLeft, Lock } from 'lucide-react';
 
 interface HeaderProps {
   isAdminView?: boolean;
   onToggleAdmin?: () => void;
+  onOpenAdmin?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ isAdminView = false, onToggleAdmin }) => {
+export const Header: React.FC<HeaderProps> = ({ isAdminView = false, onToggleAdmin, onOpenAdmin }) => {
   return (
     <header className="text-center mb-8 sm:mb-10 relative">
       {/* Return button ONLY if already in admin mode */}
@@ -20,6 +21,22 @@ export const Header: React.FC<HeaderProps> = ({ isAdminView = false, onToggleAdm
           >
             <ArrowLeft className="w-3.5 h-3.5 text-[#C59B68]" />
             <span>Voltar ao Diagnóstico Público</span>
+          </button>
+        </div>
+      )}
+
+      {/* Subtle discreet Gestora shortcut in header */}
+      {!isAdminView && onOpenAdmin && (
+        <div className="absolute right-0 top-0">
+          <button
+            type="button"
+            onClick={onOpenAdmin}
+            id="btn-header-open-admin"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-400 hover:text-[#0E1B33] hover:bg-slate-100 transition-colors cursor-pointer"
+            title="Acesso exclusivo da Gestora"
+          >
+            <Lock className="w-3.5 h-3.5 text-[#C59B68]" />
+            <span className="hidden sm:inline">Gestora</span>
           </button>
         </div>
       )}

@@ -8,6 +8,7 @@ import {
   UserCheck, 
   ExternalLink, 
   Eye, 
+  EyeOff,
   Trash2, 
   Settings, 
   RefreshCw, 
@@ -38,6 +39,7 @@ interface AdminDashboardProps {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToApp }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
   const [submissions, setSubmissions] = useState<SubmissionRecord[]>([]);
@@ -128,11 +130,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToApp }) =
     e.preventDefault();
     setAuthError(null);
 
+    const cleanPassword = passwordInput.trim();
+    if (!cleanPassword) {
+      setAuthError('Por favor, digite a senha da gestora.');
+      return;
+    }
+
     try {
       const res = await fetch('/api/admin/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: passwordInput })
+        body: JSON.stringify({ password: cleanPassword })
       });
 
       const data = await res.json();
@@ -142,7 +150,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToApp }) =
         setIsAuthenticated(true);
         setPasswordInput('');
       } else {
-        setAuthError(data.error || 'Senha incorreta.');
+        setAuthError(data.error || 'Senha incorreta. Verifique se digitou P@ta2105 com P maiúsculo.');
       }
     } catch {
       setAuthError('Erro ao comunicar com o servidor de autenticação.');
@@ -342,27 +350,53 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToApp }) =
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-[#0E1B33] uppercase tracking-wider mb-1.5">
-              Senha de Acesso
-            </label>
-            <input 
-              type="password"
-              placeholder="Digite sua senha da gestora"
-              value={passwordInput}
-              onChange={(e) => setPasswordInput(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#C59B68]"
-              autoFocus
-            />
-            <p className="text-[11px] text-slate-400 mt-1.5">
-              Acesso restrito à equipe Inspirar Finanças. Digite sua senha de gestora.
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-bold text-[#0E1B33] uppercase tracking-wider">
+                Senha de Acesso
+              </label>
+              <button
+                type="button"
+                onClick={() => setPasswordInput('P@ta2105')}
+                className="text-[11px] text-[#8C6934] hover:underline font-semibold cursor-pointer"
+                title="Preencher P@ta2105 automaticamente"
+              >
+                Preencher senha
+              </button>
+            </div>
+
+            <div className="relative">
+              <input 
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Digite P@ta2105"
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                className="w-full pl-4 pr-11 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#C59B68]"
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                title={showPassword ? 'Ocultar senha' : 'Ver senha digitada'}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+
+            <p className="text-[11px] text-slate-500 mt-1.5">
+              Acesso exclusivo da Inspirar Finanças. A senha padrão configurada é <code className="font-mono font-bold text-[#0E1B33] bg-slate-100 px-1 py-0.5 rounded">P@ta2105</code> (com <strong>P</strong> maiúsculo e <strong>@</strong>).
             </p>
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 px-4 rounded-xl bg-[#0E1B33] hover:bg-[#182C50] text-white font-bold text-sm transition-all cursor-pointer shadow-md"
+            className="w-full py-3 px-4 rounded-xl bg-[#0E1B33] hover:bg-[#182C50] text-white font-bold text-sm transition-all cursor-pointer shadow-md flex items-center justify-center gap-2"
           >
-            Entrar no Painel
+            <Lock className="w-4 h-4 text-[#C59B68]" />
+            <span>Entrar no Painel</span>
           </button>
         </form>
 

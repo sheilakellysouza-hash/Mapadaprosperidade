@@ -159,7 +159,7 @@ app.post('/api/admin/verify', (req, res) => {
   const now = Date.now();
   const attemptInfo = loginAttempts.get(ip) || { attempts: 0, blockedUntil: 0 };
 
-  // Check if IP is currently blocked
+  // Check if IP is currently blocked (auto unblock after 60 seconds)
   if (attemptInfo.blockedUntil > now) {
     const remainingSeconds = Math.ceil((attemptInfo.blockedUntil - now) / 1000);
     return res.status(429).json({ 
@@ -167,9 +167,17 @@ app.post('/api/admin/verify', (req, res) => {
     });
   }
 
-  const { password } = req.body;
+  const rawPassword = (req.body?.password || '').toString();
+  const cleanPassword = rawPassword.trim();
   const settings = getSettings();
-  const valid = password === settings.adminPassword || password === 'P@ta2105';
+  const configuredPassword = (settings.adminPassword || 'P@ta2105').toString().trim();
+
+  // Accept exact password, configured password, or case-insensitive variation (e.g. p@ta2105 or P@ta2105)
+  const valid = 
+    cleanPassword === configuredPassword ||
+    cleanPassword === 'P@ta2105' ||
+    cleanPassword.toLowerCase() === configuredPassword.toLowerCase() ||
+    cleanPassword.toLowerCase() === 'p@ta2105';
 
   if (valid) {
     loginAttempts.delete(ip);
@@ -179,15 +187,17 @@ app.post('/api/admin/verify', (req, res) => {
     res.json({ success: true, token });
   } else {
     attemptInfo.attempts += 1;
-    if (attemptInfo.attempts >= 5) {
-      attemptInfo.blockedUntil = now + 5 * 60 * 1000; // 5 minute lockout
+    if (attemptInfo.attempts >= 8) {
+      attemptInfo.blockedUntil = now + 60 * 1000; // 1 minute lockout
     }
     loginAttempts.set(ip, attemptInfo);
     
-    if (attemptInfo.attempts >= 5) {
-      return res.status(429).json({ error: 'Limite de tentativas excedido. Bloqueado temporariamente por 5 minutos.' });
+    if (attemptInfo.attempts >= 8) {
+      return res.status(429).json({ error: 'Limite de tentativas excedido. Bloqueado temporariamente por 1 minuto.' });
     }
-    res.status(401).json({ error: `Senha incorreta. Tentativa ${attemptInfo.attempts} de 5.` });
+    res.status(401).json({ 
+      error: `Senha incorreta. Verifique maiúsculas e o caractere @. (Tentativa ${attemptInfo.attempts} de 8)` 
+    });
   }
 });
 

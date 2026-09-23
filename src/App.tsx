@@ -28,18 +28,21 @@ export default function App() {
   const [businessChoice, setBusinessChoice] = useState<BusinessChoice>(null);
   const [businessAns, setBusinessAns] = useState<Record<number, string>>({});
 
-  // Check URL query param, pathname or hash for exclusive gestora access (?gestora=true, /gestora, #gestora)
+  // Check URL query param, pathname or hash for exclusive gestora access (?gestora=true, ?gestora, /gestora, #gestora)
   useEffect(() => {
     const checkIsGestoraUrl = () => {
       const params = new URLSearchParams(window.location.search);
       const isGestoraRoute = 
+        params.has('gestora') || 
+        params.has('admin') || 
+        params.has('painel') ||
         params.get('gestora') === 'true' || 
         params.get('admin') === 'true' || 
         params.get('painel') === 'true' ||
-        window.location.pathname.endsWith('/gestora') ||
-        window.location.pathname.endsWith('/admin') ||
-        window.location.hash === '#gestora' ||
-        window.location.hash === '#admin';
+        window.location.pathname.includes('/gestora') ||
+        window.location.pathname.includes('/admin') ||
+        window.location.hash.includes('gestora') ||
+        window.location.hash.includes('admin');
 
       setIsAdminView(isGestoraRoute);
     };
@@ -261,6 +264,10 @@ export default function App() {
         <Header 
           isAdminView={isAdminView} 
           onToggleAdmin={handleExitAdmin} 
+          onOpenAdmin={() => {
+            setIsAdminView(true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
         />
 
         {isAdminView ? (
@@ -330,12 +337,15 @@ export default function App() {
             <button
               id="btn-footer-gestora"
               type="button"
-              onClick={() => setIsAdminView(true)}
-              className="inline-flex items-center gap-1 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer group py-0.5"
+              onClick={() => {
+                setIsAdminView(true);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-slate-500 hover:text-[#0E1B33] bg-slate-100 hover:bg-[#FAF6EE] border border-slate-200 hover:border-[#E9D7BC] transition-all text-xs font-semibold cursor-pointer shadow-2xs group"
               title="Acesso exclusivo da Gestora"
             >
-              <Lock className="w-3 h-3 text-slate-300 group-hover:text-[#C59B68] transition-colors" />
-              <span className="group-hover:underline">Acesso Gestora</span>
+              <Lock className="w-3 h-3 text-[#C59B68] group-hover:scale-110 transition-transform" />
+              <span>Acesso Gestora (Painel)</span>
             </button>
           </div>
         </footer>

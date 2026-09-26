@@ -150,7 +150,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToApp }) =
         setIsAuthenticated(true);
         setPasswordInput('');
       } else {
-        setAuthError(data.error || 'Senha incorreta. Verifique se digitou P@ta2105 com P maiúsculo.');
+        setAuthError(data.error || 'Senha incorreta. Verifique os dados digitados e tente novamente.');
       }
     } catch {
       setAuthError('Erro ao comunicar com o servidor de autenticação.');
@@ -350,24 +350,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToApp }) =
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-bold text-[#0E1B33] uppercase tracking-wider">
-                Senha de Acesso
-              </label>
-              <button
-                type="button"
-                onClick={() => setPasswordInput('P@ta2105')}
-                className="text-[11px] text-[#8C6934] hover:underline font-semibold cursor-pointer"
-                title="Preencher P@ta2105 automaticamente"
-              >
-                Preencher senha
-              </button>
-            </div>
+            <label className="block text-xs font-bold text-[#0E1B33] uppercase tracking-wider mb-1.5">
+              Senha de Acesso
+            </label>
 
             <div className="relative">
               <input 
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Digite P@ta2105"
+                placeholder="Digite a senha de acesso"
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
                 autoCapitalize="none"
@@ -386,8 +376,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToApp }) =
               </button>
             </div>
 
-            <p className="text-[11px] text-slate-500 mt-1.5">
-              Acesso exclusivo da Inspirar Finanças. A senha padrão configurada é <code className="font-mono font-bold text-[#0E1B33] bg-slate-100 px-1 py-0.5 rounded">P@ta2105</code> (com <strong>P</strong> maiúsculo e <strong>@</strong>).
+            <p className="text-[11px] text-slate-500 mt-2 text-center leading-relaxed">
+              Área restrita e confidencial. Acesso exclusivo para a gestão da <strong className="text-[#0E1B33]">Inspirar Finanças</strong>.
             </p>
           </div>
 
@@ -396,7 +386,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToApp }) =
             className="w-full py-3 px-4 rounded-xl bg-[#0E1B33] hover:bg-[#182C50] text-white font-bold text-sm transition-all cursor-pointer shadow-md flex items-center justify-center gap-2"
           >
             <Lock className="w-4 h-4 text-[#C59B68]" />
-            <span>Entrar no Painel</span>
+            <span>Acessar Painel</span>
           </button>
         </form>
 

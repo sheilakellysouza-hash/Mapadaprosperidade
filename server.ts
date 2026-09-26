@@ -32,7 +32,7 @@ function getSettings() {
   }
   return {
     whatsappNumber: '5571999999999',
-    adminPassword: 'P@ta2105'
+    adminPassword: 'skls2026'
   };
 }
 
@@ -170,14 +170,12 @@ app.post('/api/admin/verify', (req, res) => {
   const rawPassword = (req.body?.password || '').toString();
   const cleanPassword = rawPassword.trim();
   const settings = getSettings();
-  const configuredPassword = (settings.adminPassword || 'P@ta2105').toString().trim();
+  const configuredPassword = (settings.adminPassword || 'skls2026').toString().trim();
 
-  // Accept exact password, configured password, or case-insensitive variation (e.g. p@ta2105 or P@ta2105)
+  // Validate against configured password (trimmed and case-insensitive for convenience)
   const valid = 
     cleanPassword === configuredPassword ||
-    cleanPassword === 'P@ta2105' ||
-    cleanPassword.toLowerCase() === configuredPassword.toLowerCase() ||
-    cleanPassword.toLowerCase() === 'p@ta2105';
+    cleanPassword.toLowerCase() === configuredPassword.toLowerCase();
 
   if (valid) {
     loginAttempts.delete(ip);
@@ -196,7 +194,7 @@ app.post('/api/admin/verify', (req, res) => {
       return res.status(429).json({ error: 'Limite de tentativas excedido. Bloqueado temporariamente por 1 minuto.' });
     }
     res.status(401).json({ 
-      error: `Senha incorreta. Verifique maiúsculas e o caractere @. (Tentativa ${attemptInfo.attempts} de 8)` 
+      error: `Senha incorreta. Verifique os dados digitados e tente novamente. (Tentativa ${attemptInfo.attempts} de 8)` 
     });
   }
 });

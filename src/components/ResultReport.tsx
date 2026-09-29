@@ -40,7 +40,9 @@ export const ResultReport: React.FC<ResultReportProps> = ({
   onReset,
 }) => {
   const [copied, setCopied] = useState(false);
-  const [whatsappTargetNumber, setWhatsappTargetNumber] = useState('5571999999999');
+  const [whatsappTargetNumber, setWhatsappTargetNumber] = useState(() => {
+    return localStorage.getItem('mil_whatsapp_number') || '5571999999999';
+  });
   const hasBusiness = businessChoice === 'yes';
 
   const overallAvg = React.useMemo(() => {
@@ -51,10 +53,17 @@ export const ResultReport: React.FC<ResultReportProps> = ({
 
   useEffect(() => {
     fetch('/api/settings')
-      .then(r => r.json())
+      .then(r => {
+        const ct = r.headers.get('content-type') || '';
+        if (r.ok && ct.includes('application/json')) {
+          return r.json();
+        }
+        return null;
+      })
       .then(data => {
-        if (data.whatsappNumber) {
+        if (data && data.whatsappNumber) {
           setWhatsappTargetNumber(data.whatsappNumber);
+          localStorage.setItem('mil_whatsapp_number', data.whatsappNumber);
         }
       })
       .catch(() => {});

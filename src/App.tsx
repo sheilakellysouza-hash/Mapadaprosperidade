@@ -235,6 +235,16 @@ export default function App() {
       overallAvg
     };
 
+    // Save to localStorage so responses are safely preserved offline and on static hosts
+    try {
+      const stored = localStorage.getItem('mil_submissions');
+      const list = stored ? JSON.parse(stored) : [];
+      list.unshift(record);
+      localStorage.setItem('mil_submissions', JSON.stringify(list));
+    } catch (e) {
+      console.warn('Could not save submission to localStorage:', e);
+    }
+
     // Post to backend API
     fetch('/api/submissions', {
       method: 'POST',
